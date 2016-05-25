@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Layer List Dijit</title>
+    <link rel="stylesheet" href="http://localhost:63342/arcgisjsdemos/arcgis/3.16/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="http://localhost:63342/arcgisjsdemos/arcgis/3.16/esri/css/esri.css">
+
+
+    <style>
+
+
+        @import "arcgis/3.16/dojox/widget/FisheyeList/FisheyeList.css";
+
+        .dojoxFisheyeListBar {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .outerbar {
+            text-align: center;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+        }
+
+        html, body, .container, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            margin: 0;
+            font-family: "Open Sans";
+        }
+
+        #map {
+            padding: 0;
+        }
+
+        .esriLayerList .esriList {
+            border-top: none;
+        }
+
+        .esriLayerList .esriTitle {
+            background-color: #fff;
+            border-bottom: none;
+        }
+
+        .esriLayerList .esriList ul {
+            background-color: #fff;
+        }
+
+        .options-panel {
+            font: 14px helvetica, sans-serif;
+            background-color: #fff;
+            position: absolute;
+            right: 0px;
+            top: 10px;
+            z-index: 10000;
+        }
+
+        #HomeButton {
+            position: absolute;
+            top: 95px;
+            left: 20px;
+            z-index: 50;
+        }
+
+    </style>
+    <script>var dojoConfig = {parseOnLoad: true};</script>
+    <script src="http://localhost:63342/arcgisjsdemos/arcgis/3.16/init.js"></script>
+    <script>
+        require([
+            "esri/config",
+            "esri/map",
+            "esri/dijit/HomeButton",
+            "esri/dijit/Scalebar",
+            "esri/arcgis/utils",
+            "esri/dijit/LayerList",
+            "esri/dijit/Measurement",
+            "esri/tasks/GeometryService",
+            "dojo/dom",
+            "dojo/on",
+            "dojox/widget/FisheyeList",
+            "dojox/widget/FisheyeListItem",
+            "dojox/widget/DialogSimple",
+            "dijit/form/HorizontalSlider",
+            "dijit/form/HorizontalRuleLabels",
+            "dijit/layout/BorderContainer",
+            "dijit/layout/ContentPane",
+            "dojo/domReady!"
+        ], function (esriConfig, Map, HomeButton, Scalebar, arcgisUtils,
+                     LayerList, Measurement, GeometryService,
+                     dom, on, FisheyeList, FisheyeListItem,
+                     Dialog, HorizontalSlider, HorizontalRuleLabels) {
+
+            esriConfig.defaults.geometryService = new GeometryService("http://192.168.10.4:8399/arcgis/rest/services/Geometry/GeometryServer");
+            var map = new esri.Map("map");
+            //图层 添加 start ===================//
+            var imageLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%BD%B1%E5%83%8F/%E9%81%A5%E6%84%9F%E5%BD%B1%E5%83%8F%E5%9B%BE/MapServer");
+            var baseLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%B1%82/%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%B1%82/MapServer");
+            var proLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E7%A7%91%E5%AE%A4%E4%B8%93%E9%A2%98%E5%9B%BE/%E6%B5%81%E7%A8%8B%E6%97%A0%E5%85%B3%E4%B8%93%E9%A2%98%E5%9B%BE/MapServer");
+            map.addLayers([baseLayer, imageLayer, proLayer]);
+            //baseLayer.setOpacity(0.5);
+            /*map.addLayer(baseLayer);
+             map.addLayer(imageLayer);
+             map.addLayer(proLayer);*/
+            //图层添加 end ===================//
+
+
+            //图层 管理列表 start ===================//
+            var layerList = new Array();
+            var imageLayerObject = {visibility: false, layer: imageLayer, title: '影像图层'};
+            var baseLayerObject = {visibility: true, layer: baseLayer, title: '基础图层'};
+            var proLayerObject = {visibility: false, layer: proLayer, title: '专题图层'};
+
+            layerList.push(baseLayerObject);
+            layerList.push(imageLayerObject);
+            layerList.push(proLayerObject);
+
+            var layerListWidget = new LayerList({
+                map: map,
+                layers: layerList
+            }, "layerList");
+            layerListWidget.startup();
+            //图层 管理列表 end ===================//
+
+            //初始比例界面 start ===================//
+            var home = new HomeButton({
+                map: map
+            }, "HomeButton");
+            home.startup();
+            //初始比例界面 end ===================//
+
+            //比例尺 start ===================//
+            var scalebar = new Scalebar({
+                map: map,
+                // "dual" displays both miles and kilometers
+                // "english" is the default, which displays miles
+                // use "metric" for kilometers
+                scalebarUnit: "dual"
+            });
+            //比例尺 end ===================//
+
+
+            //功能列表 start======//
+            var funBtnList = new FisheyeList({
+                id: "funBtnList", itemWidth: 50
+                , itemHeight: 50
+                , itemMaxWidth: 200
+                , itemMaxHeight: 200
+                , orientation: "horizontal"
+                , effectUnits: 2
+                , itemPadding: 10
+                , attachEdge: "top"
+                , labelEdge: "bottom"
+            });
+
+            //测量功能 start ============//
+            var funbtn = new FisheyeListItem({iconSrc: "images/ruler.png", label: "测量工具", id: "i_drawmeasure"});
+            var funDialog;
+            funbtn.on("click", function (evt) {
+                if (!funDialog) {
+                    funDialog = Dialog({
+                        title: '测量',
+                        style: 'width:260px',
+                        content: "<div id='measurementDiv'></div>",
+                        onHide: function (e) {
+                            measurement.destroy();
+                            funDialog.destroy();
+                            funDialog = null;
+                        }
+                    });
+                    /* var measurement = new Measurement({
+                     map: map
+                     });
+                     funDialog.addChild(measurement);*/
+                    funDialog.show();
+                    var measurement = new Measurement({
+                        map: map
+                    }, dom.byId("measurementDiv"));
+
+                    measurement.startup();
+                    dijit._underlay.domNode.style.display = "none";//去掉dialog自带遮罩
+                } else {
+                    funDialog.hide();
+                }
+            });
+
+
+            funBtnList.addChild(funbtn);// or  funbtn.placeAt(funBtnList);
+            funbtn.set("parent", funBtnList);//设置parent 否则出错 鼠标放上去无法查看label
+            //测量功能 start ============//
+
+            // 图层透明控制 start ========//
+            var opactiyFun = new FisheyeListItem({iconSrc: "images/layers3.png", label: "透明控制"});
+            funBtnList.addChild(opactiyFun);// or  funbtn.placeAt(funBtnList);
+            opactiyFun.set("parent", funBtnList);//设置parent 否则出错 鼠标放上去无法查看label
+            var opactiyFunDialog;
+            opactiyFun.on("click", function (evt) {
+                if (!opactiyFunDialog) {
+                    opactiyFunDialog = Dialog({
+                        title: '透明控制',
+                        style: 'width:260px',
+                        onHide: function (e) {
+                            opactiyFunDialog.destroy();
+                            opactiyFunDialog = null;
+                        }
+                    });
+                    opactiyFunDialog.show();
+                    var sliderObj = {
+                        value: 1, minimum: 0,
+                        maximum: 1,
+                        discreteValues: 11,
+                        intermediateChanges: true,
+                        showButtons: true,
+                        style: "width:240px;"
+                    };
+                    /*for (var i = layerList.length - 1; i >-1; i--) {
+                     var o = layerList[i];
+                     var slider = new HorizontalSlider(sliderObj);
+                     var labels = new HorizontalRuleLabels({
+                     style: "height:1.5em;font-size:75%;color:gray;",
+                     labels: [o.title]
+                     });
+                     slider.setAttribute("value", o.layer.opacity);
+                     labels.placeAt(slider);
+                     slider.on("change", function (v) {
+                     o.layer.setOpacity(v);
+                     });
+                     slider.placeAt(opactiyFunDialog);
+                     }*/
+
+                    dojo.forEach(layerList, function (o, i) {
+                        var slider = new HorizontalSlider(sliderObj);
+                        var labels = new HorizontalRuleLabels({
+                            style: "height:1.5em;font-size:75%;color:gray;",
+                            labels: [o.title]
+                        });
+                        slider.setAttribute("value", o.layer.opacity);
+                        labels.placeAt(slider);
+                        slider.on("change", function (v) {
+                            o.layer.setOpacity(v);
+                        });
+                        slider.placeAt(opactiyFunDialog);
+                    });
+
+                    dijit._underlay.domNode.style.display = "none";//去掉dialog自带遮罩
+                } else {
+                    opactiyFunDialog.hide();
+                }
+            });
+            funBtnList.placeAt("funcListDiv");
+            funBtnList.startup();
+
+
+        });
+    </script>
+</head>
+<body class="claro">
+
+<div class="outerbar" id="funcListDiv">
+</div>
+
+<div class="container" data-dojo-type="dijit/layout/BorderContainer"
+     data-dojo-props="design:'headline',gutters:false">
+    <div id="map" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+        <div id="HomeButton"></div>
+        <div class="options-panel" data-dojo-type="dijit/TitlePane" data-dojo-props="title: '图层管理'"
+             id="layerListPanel">
+            <div id="layerList"></div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
