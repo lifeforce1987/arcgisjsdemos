@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html> 
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Identify with Popup</title>
+
+    <link rel="stylesheet" type="text/css" href="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" type="text/css" href="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/esri/css/esri.css">
+  <script type="text/javascript" src="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/init.js"></script>
+    <style>
+      html, body, #map {
+        height:100%;
+        width:100%;
+        margin:0;
+        padding:0;
+      }
+    </style>
+    <script>
+      var map;
+      require([
+        "esri/map",
+        "esri/InfoTemplate",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/symbols/SimpleFillSymbol",
+        "esri/symbols/SimpleLineSymbol",
+        "esri/tasks/QueryTask",
+		"esri/tasks/query",
+        "esri/dijit/Popup",
+        "dojo/_base/array",
+        "esri/Color",
+        "dojo/dom-construct",
+		"esri/dijit/PopupTemplate",
+		"dojo/on",
+        "dojo/domReady!"
+		
+      ], function (
+        Map, InfoTemplate, ArcGISDynamicMapServiceLayer, SimpleFillSymbol,
+        SimpleLineSymbol, QueryTask, Query,Popup,
+        arrayUtils, Color, domConstruct,PopupTemplate,on
+      ) {
+
+        var queryTask;
+
+        var popup = new Popup({
+          fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+            new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+              new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]))
+        }, domConstruct.create("div"));
+
+        map = new esri.Map("map",{
+	   infoWindow: popup});
+    var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%BD%B1%E5%83%8F/2015%E5%B9%B4%E5%BA%A6%E9%81%A5%E6%84%9F%E5%BD%B1%E5%83%8F/MapServer");
+    map.addLayer(layer);
+
+        map.on("load", function(){
+			on(dojo.byId('searchSubmit') , 'click',executeQueryTask);
+		});
+
+        var parcelsURL = "http://192.168.10.4:8399/arcgis/rest/services/%E4%B8%80%E5%BC%A0%E5%9B%BE/%E7%9B%91%E6%B5%8B%E5%9B%BE%E6%96%91/MapServer";
+        map.addLayer(new ArcGISDynamicMapServiceLayer(parcelsURL,
+          { visible:true}));
+		
+		var popupTemplate = new PopupTemplate({
+        "title": "图斑编号：{JCBH}",
+        "fieldInfos": [{
+          "fieldName": "JCBH",
+          "label": "图斑编号",
+		  visible: false
+        }, {
+          "fieldName": "JCMJ",
+          "label": "图斑面积(亩)：",
+		  visible: true,
+          "format": {
+            "places": 0,
+            "digitSeparator": true
+          }
+        }, {
+          "fieldName": "XZQHMC ",
+          "label": "镇区：",
+		  visible: true
+        }]
+      });
+
+        function executeQueryTask() {
+		  var  bh = dojo.byId('search_input').value;
+		  queryTask = new QueryTask(parcelsURL+"/6");
+		  var query = new Query();
+          query.returnGeometry = true;
+          query.outFields=["*"];
+		  query.where = "JCBH = '"+bh+"'";
+		  var point = "";
+          var deferred = queryTask
+            .execute(query)
+            .addCallback(function (response) {
+				return arrayUtils.map(response.features, function (feature) {
+					feature.setInfoTemplate(popupTemplate);
+					map.infoWindow.show(feature.geometry.getExtent().getCenter());
+					map.centerAt(feature.geometry.getExtent().getCenter());
+					map.setExtent(feature.geometry.getExtent().expand(10));
+					return feature;
+              });
+            });
+            map.infoWindow.setFeatures([deferred]);
+        }
+		
+		function showFeature(feature,evt) {
+			map.graphics.clear();
+			feature.setSymbol(symbol);
+			feature.setInfoTemplate(popupTemplate);
+			map.graphics.add(feature);
+      }
+
+      function showFeatureSet(fset,evt) {
+        //remove all graphics on the maps graphics layer
+        map.graphics.clear();
+        featureSet = fset;
+        var numFeatures = featureSet.features.length;
+        //QueryTask returns a featureSet.  Loop through features in the featureSet and add them to the infowindow.
+        var content = "";
+        for (var i=0; i<numFeatures; i++) {
+          var graphic = featureSet.features[i];
+          content = content + graphic.attributes.FIELD_NAME + " Field (<A href='#' onclick='showFeature(featureSet.features[" + i + "]);'>show</A>)<br/>";
+        }
+        map.infoWindow.setContent(content);
+        map.infoWindow.show(evt.screenPoint);
+      }
+	  
+	  
+      });
+    </script>
+  </head>
+  
+  <body>
+	 
+    <div id="map">
+		<div role="presentation" class="arcgisSearch" id="search" widgetid="search" style="display: block;">
+  <div role="presentation" class="searchGroup" data-dojo-attach-point="containerNode">
+    <div data-dojo-attach-point="expandNode" class="searchExpandContainer">
+      <div class="searchAnimate">
+        
+        <div class="searchInputGroup">
+          <form data-dojo-attach-point="formNode">
+            <input maxlength="128" autocomplete="off" type="text" tabindex="0" class="searchInput" value="" aria-haspopup="true" id="search_input" data-dojo-attach-point="inputNode" role="textbox" placeholder="输入图斑编号" title="输入图斑编号">
+          </form>
+          <div role="button" class="searchClear" tabindex="0" data-dojo-attach-point="clearNode"><span aria-hidden="true" class="searchIcon esri-icon-close searchClose"></span><span aria-hidden="true" class="searchIcon esri-icon-loading-indicator searchSpinner"></span>
+          </div>
+          <div aria-labelledby="search_input" data-dojo-attach-point="suggestionsNode" class="searchMenu suggestionsMenu" role="menu"></div>
+        </div>
+      </div>
+    </div>
+    <div role="button" title="搜索" class="searchBtn searchSubmit" id="searchSubmit" tabindex="0" data-dojo-attach-point="submitNode">
+      <span aria-hidden="true" role="presentation" class="searchIcon esri-icon-search"></span>
+      <span class="searchButtonText">搜索</span>
+    </div>
+  </div>
+</div>
+	</div>
+  </body>
+
+</html>

@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Popups with related records</title>
+  <link rel="stylesheet" type="text/css" href="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" type="text/css" href="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/esri/css/esri.css">
+  <script type="text/javascript" src="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/init.js"></script>
+  <style>
+    html, body {
+      height:  100%;
+      width:   100%;
+      margin:  0;
+      padding: 0;
+    }
+
+    #map {
+      width:   100%;
+      height:  100%;
+      margin:  0;
+      padding: 0;
+    }
+
+    .claro .dijitTooltipContainer {
+      background-image: none;
+      border:           1px solid #444444;
+      background-color: #444444;
+      color:            #FFFFFF;
+    }
+
+    .claro .dijitTooltipConnector {
+      background-image: none;
+    }
+  </style>
+  <script type="text/javascript" src="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/init.js"></script>
+  <script>
+    var map;
+
+    require([
+      "dojo/dom-construct",
+      "dojo/parser",
+      "dojox/charting/themes/GreySkies",
+      "esri/Color",
+      "esri/config",
+      "esri/dijit/Popup",
+      "esri/dijit/PopupTemplate",
+	  "esri/layers/FeatureLayer",
+      "esri/layers/ArcGISDynamicMapServiceLayer",
+	  
+      "esri/map",
+
+      "esri/symbols/SimpleFillSymbol",
+      "esri/tasks/GeometryService",
+	  "esri/geometry/Point",
+	  "esri/tasks/IdentifyTask",
+	  "esri/tasks/IdentifyParameters",
+	  
+      "dojo/domReady!"
+    ], function(
+      domConstruct, parser, GreySkies, Color, esriConfig, 
+      Popup, PopupTemplate, FeatureLayer,ArcGISDynamicMapServiceLayer, Map,
+      SimpleFillSymbol, SimpleLineSymbol, GeometryService,Point,IdentifyTask,IdentifyParameters
+    ) {
+      parser.parse();
+
+      
+
+      var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
+      var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
+
+      var popupOptions = {
+        fillSymbol: sfs,
+        marginLeft: "20",
+        marginTop: "20"
+      };
+      //create a popup to replace the map's info window
+      var popup = new Popup(popupOptions, domConstruct.create("div"));
+
+      
+	  
+	  
+	   map = new esri.Map("map",{
+	   infoWindow: popup});
+    var layer = new esri.layers.ArcGISTiledMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%BD%B1%E5%83%8F/2015%E5%B9%B4%E5%BA%A6%E9%81%A5%E6%84%9F%E5%BD%B1%E5%83%8F/MapServer");
+    map.addLayer(layer);
+
+      var popupTemplate = new PopupTemplate({
+        "title": "图斑编号：{JCBH}",
+        "fieldInfos": [{
+          "fieldName": "JCBH",
+          "label": "图斑编号",
+		  visible: false
+        }, {
+          "fieldName": "JCMJ",
+          "label": "图斑面积(亩)：",
+		  visible: true,
+          "format": {
+            "places": 0,
+            "digitSeparator": true
+          }
+        }, {
+          "fieldName": "XZQHMC",
+          "label": "镇区：",
+		  visible: true
+        }]
+      });
+	  
+	  
+	  
+		/**
+      var dynamicLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E4%B8%80%E5%BC%A0%E5%9B%BE/%E7%9B%91%E6%B5%8B%E5%9B%BE%E6%96%91/MapServer", {
+        infoTemplate: popupTemplate,
+		visible:true,
+		useMapImage:true,
+        outFields: ["*"]
+      });**/
+	   var featureLayer = new FeatureLayer("http://192.168.10.4:8399/arcgis/rest/services/%E4%B8%80%E5%BC%A0%E5%9B%BE/%E7%9B%91%E6%B5%8B%E5%9B%BE%E6%96%912/FeatureServer/0", {
+        mode: FeatureLayer.MODE_SNAPSHOT,
+        infoTemplate: popupTemplate,
+        outFields: ["*"]
+      });
+      map.addLayer(featureLayer);
+	  
+    });
+	var a = function(){
+		/**var identify = new IdentifyTask("http://192.168.10.4:8399/arcgis/rest/services/%E4%B8%80%E5%BC%A0%E5%9B%BE/%E7%9B%91%E6%B5%8B%E5%9B%BE%E6%96%91/MapServer");
+		var identifyParams = new IdentifyParameters();
+        identifyParams.tolerance = 3;
+        identifyParams.returnGeometry = true;
+        identifyParams.layerIds = [6];
+        identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
+        identifyParams.width = map.width;
+        identifyParams.height = map.height;
+		identifyParams.layerDefinitions=["JCBH='1815'"];
+		identifyTask.execute(identifyParams)
+			.addCallback(function (response) {
+			
+		});**/
+		var locate = new esri.geometry.Point(38489517.68609910,2537233.92358601,4326)    
+		map.centerAndZoom(locate,8);
+	  }
+  </script>
+</head>
+<body class="claro">
+<div id="map">
+</div>
+<button onclick="a()">定位</button>
+</body>
+</html>
+
