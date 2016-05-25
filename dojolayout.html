@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Demo: Layout with Dijit</title>
+
+    <link rel="stylesheet" href="http://localhost:63342/arcgisjsdemos/arcgis/3.16/dijit/themes/claro/claro.css"
+          media="screen">
+    <style>
+        * {
+            outline: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 2em;
+            font-family: Lucida Sans, Lucida Grande, Arial !important;
+            font-size: 13px !important;
+            background: white;
+            color: #333;
+        }
+
+        button {
+            -webkit-transition: background-color 0.2s linear;
+            border-radius: 4px;
+            -moz-border-radius: 4px 4px 4px 4px;
+            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+            background-color: #E4F2FF;
+            background-image: url("http://localhost:63342/arcgisjsdemos/arcgis/3.16/dijit/themes/claro/form/images/button.png");
+            background-position: center top;
+            background-repeat: repeat-x;
+            border: 1px solid #769DC0;
+            padding: 2px 8px 4px;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background-color: #AFD9FF;
+            color: #000000;
+        }
+
+        h1 {
+            font-size: 1.5em;
+        }
+
+        .break {
+            float: none;
+            clear: both;
+        }
+
+        /* Any demo specific styling needed for this tutorial only */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        #appLayout {
+            height: 100%;
+        }
+
+        #leftCol {
+            width: 14em;
+        }
+
+        .claro .demoLayout .edgePanel {
+            background-color: #d0e9fc;
+        }
+
+        #viewsChart {
+            width: 550px;
+            height: 550px;
+        }
+    </style>
+</head>
+<body class="claro">
+<div id="appLayout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer"
+     data-dojo-props="design: 'headline'">
+    <div class="centerPanel" data-dojo-type="dijit/layout/TabContainer"
+         data-dojo-props="region: 'center', tabPosition: 'bottom'">
+        <div data-dojo-type="dijit/layout/ContentPane" title="Group 1">
+            <h4>Group 1 Content</h4>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex
+                ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat
+                nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+                mollit
+                anim id est laborum.</p>
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="Group Two">
+            <h4>Group 2 Content</h4>
+        </div>
+        <div data-dojo-type="dijit/layout/ContentPane" title="Long Tab Label for this One">
+            <h4>Group 3 Content</h4>
+        </div>
+    </div>
+    <div class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">Header content
+        (top)
+    </div>
+    <div id="leftCol" class="edgePanel" data-dojo-type="dijit/layout/ContentPane"
+         data-dojo-props="region: 'left', splitter: true">Sidebar content (left)
+    </div>
+</div>
+<!-- load dojo -->
+<script src="http://localhost:63342/arcgisjsdemos/arcgis/3.16/dojo/dojo.js"></script>
+<script>
+    require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dojo/domReady!"], function (parser) {
+        parser.parse();
+    });
+</script>
+</body>
+</html>

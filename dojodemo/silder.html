@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css"
+          href="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
+    <script>dojoConfig = {parseOnLoad: true}</script>
+    <script type="text/javascript" src="http://192.168.10.4:8399/arcgis_js_api/library/3.14/3.14/init.js"></script>
+
+    <script>
+        require(["dojo/parser", "dojo/dom", "dijit/form/HorizontalSlider",
+                    "dijit/form/HorizontalRule", "dijit/form/HorizontalRuleLabels", "dojox/widget/DialogSimple"],
+                function (parser, dom,
+                          HorizontalSlider,
+                          HorizontalRule, HorizontalRuleLabels,
+                          DialogSimple) {
+                    var funDialog = DialogSimple({
+                        title: '测量',
+                        style: 'width:260px',
+                        content: "<div id='measurementDiv'></div>",
+
+                    });
+
+                    funDialog.show();
+                    var sliderObj = {
+                        value: 1, minimum: 0,
+                        maximum: 1,
+                        discreteValues: 11,
+                        intermediateChanges: true,
+                        showButtons: true,
+                        style: "width:200px;"
+                    };
+
+                    var slider = new HorizontalSlider(sliderObj);
+                    var labels = new HorizontalRuleLabels({
+                        style: "height:1.5em;font-size:75%;color:gray;",
+                        labels: ['状体']
+                    });
+                    labels.placeAt(slider);
+                    slider.on("change", function (v) {
+                        console.log(v);
+                    });
+                    slider.placeAt(funDialog);
+                    //slider.startup();
+                }
+        )
+        ;
+    </script>
+</head>
+<body class="claro">
+<div id="horizontalSlider0"></div>
+<div id="horizontalSlider"
+     style="width:200px;"
+     name="horizontalSlider"
+     data-dojo-type="dijit/form/HorizontalSlider"
+     data-dojo-props="value:6,
+    minimum: -10,
+    maximum:10,
+    discreteValues:11,
+    intermediateChanges:true,
+    tooltip:'111',
+    showButtons:false,
+    showButtons:true">
+</div>
+
+<div id="horizontalSlider2"
+     style="width:200px;"
+     name="horizontalSlider"
+     data-dojo-type="dijit/form/HorizontalSlider"
+     data-dojo-props="value:6,
+    minimum: -10,
+    maximum:10,
+    discreteValues:11,
+    intermediateChanges:true,
+    showButtons:false">
+    <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="topDecoration"
+        style="height:1.5em;font-size:75%;color:gray;">
+        <li></li>
+        <li>20%</li>
+        <li>40%</li>
+        <li>60%</li>
+        <li>80%</li>
+        <li></li>
+    </ol>
+    <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
+         count=11 style="height:5px;"></div>
+    <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration"
+        style="height:1em;font-size:75%;color:gray;">
+        <li>0%</li>
+        <li>50%</li>
+        <li>100%</li>
+    </ol>
+</div>
+</body>
+</html>
