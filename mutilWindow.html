@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Safari iOS - apps only -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!-- Chrome for Android - NEW! -->
+    <meta name="mobile-web-app-capable" content="yes">
+
+
+    <title>Bootstrap Map JS - Four Maps</title>
+
+    <link rel="stylesheet" href="//js.arcgis.com/3.16/dijit/themes/claro/claro.css">
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/mutilWindow.css" rel="stylesheet">
+
+    <!-- Bootstrap-map-js -->
+    <link rel="stylesheet" type="text/css" href="http://localhost:63342/arcgisjsdemo/arcgis/3.16/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrapmap.css">
+
+    <style type="text/css">
+
+        .container.main {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .row {
+            margin-bottom: 0;
+        }
+
+        [class*="col-"] {
+            margin-bottom: 10px;
+        }
+
+        .options-panel {
+            font: 14px helvetica, sans-serif;
+            background-color: #fff;
+            position: absolute;
+            right: 15px;
+            top: 0px;
+            z-index: 10000;
+        }
+
+        /* Extra small devices (phones, up to 480px) */
+        @media (max-width: 480px) {
+            .map {
+                height: 100px;
+            }
+
+            .container.main {
+                margin-top: 10px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 767px) {
+            .map {
+                height: 150px;
+            }
+
+            .container.main {
+                margin-top: 10px;
+            }
+        }
+
+        /* Small devices (tablets, 768px and up) - Portrait to Landscape */
+        @media (min-width: 768px) {
+            .map {
+                height: 200px;
+            }
+
+            .row {
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Medium devices (desktops, 992px and up) */
+        @media (min-width: 992px) {
+            .map {
+                height: 300px;
+            }
+        }
+
+        /* Large devices (large desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .map {
+                height: 400px;
+            }
+        }
+
+    </style>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="../../docs-assets/js/html5shiv.js"></script>
+    <script src="../../docs-assets/js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+
+<div class="container main claro">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-lg-6">
+            <div id="mapDiv1">
+                <div class="options-panel" data-dojo-type="dijit/TitlePane" data-dojo-props="title: '图层管理'">
+                    <div id="layerList1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-lg-6">
+            <div id="mapDiv2">
+                <div class="options-panel" data-dojo-type="dijit/TitlePane" data-dojo-props="title: '图层管理'">
+                    <div id="layerList2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-lg-6">
+            <div id="mapDiv3">
+                <div class="options-panel" data-dojo-type="dijit/TitlePane" data-dojo-props="title: '图层管理'">
+                    <div id="layerList3"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-lg-6">
+            <div id="mapDiv4">
+                <div class="options-panel" data-dojo-type="dijit/TitlePane" data-dojo-props="title: '图层管理'">
+                    <div id="layerList4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- /container -->
+
+<!-- Bootstrap-map-js -->
+<script type="text/javascript">
+    var package_path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+    var dojoConfig = {
+        //The location.pathname.replace() logic below may look confusing but all its doing is
+        // enabling us to load the api from a CDN and load local modules from the correct location.
+        packages: [{
+            name: "application",
+            location: package_path + '/bootstrap/js'
+        }, {
+            name: "bootstrap",
+            location: package_path + '/bootstrap/js'
+        }],
+        parseOnLoad: true
+    };
+</script>
+<script src="http://localhost:63342/arcgisjsdemo/arcgis/3.16/init.js"></script>
+<script>
+    require(["esri/map",
+                "application/bootstrapmap",
+                "dojo/on",
+                "dojo/dom",
+                "dojo/ready",
+                "dojo/DeferredList",
+                "esri/dijit/LayerList",
+                "bootstrap/Collapse",
+                "bootstrap/Dropdown", // needed for nav dropdowns
+                "dojo/domReady!"],
+            function (Map, BootstrapMap, on, dom,
+                      ready, defList, LayerList) {
+
+                var maps = [];
+                var active = false;
+
+                function createMap(id, layerListDiv, options) {
+
+                    var map = new esri.Map(id);
+                    //图层 添加 start ===================//
+                    var imageLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%BD%B1%E5%83%8F/%E9%81%A5%E6%84%9F%E5%BD%B1%E5%83%8F%E5%9B%BE/MapServer");
+                    var baseLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%B1%82/%E5%9F%BA%E7%A1%80%E5%9B%BE%E5%B1%82/MapServer");
+                    var proLayer = new esri.layers.ArcGISDynamicMapServiceLayer("http://192.168.10.4:8399/arcgis/rest/services/%E7%A7%91%E5%AE%A4%E4%B8%93%E9%A2%98%E5%9B%BE/%E6%B5%81%E7%A8%8B%E6%97%A0%E5%85%B3%E4%B8%93%E9%A2%98%E5%9B%BE/MapServer");
+                    map.addLayers([baseLayer, imageLayer, proLayer]);
+                    //baseLayer.setOpacity(0.5);
+                    /*map.addLayer(baseLayer);
+                     map.addLayer(imageLayer);
+                     map.addLayer(proLayer);*/
+                    //图层添加 end ===================//
+
+
+                    //图层 管理列表 start ===================//
+                    var layerList = new Array();
+                    var imageLayerObject = {visibility: false, layer: imageLayer, title: '影像图层'};
+                    var baseLayerObject = {visibility: true, layer: baseLayer, title: '基础图层'};
+                    var proLayerObject = {visibility: false, layer: proLayer, title: '专题图层'};
+
+                    layerList.push(baseLayerObject);
+                    layerList.push(imageLayerObject);
+                    layerList.push(proLayerObject);
+
+                    var layerListWidget = new LayerList({
+                        map: map,
+                        layers: layerList
+                    }, layerListDiv);
+                    layerListWidget.startup();
+
+                    on(map, "load", function () {
+                        map.disableScrollWheelZoom();//滚轮放大缩小不可用
+                    });
+                    on(map, "pan-end", resizeAll);
+                    on(map, "zoom-end", resizeAll);
+                    maps.push(map);
+                }
+
+                function resizeAll(options) {
+                    if (!active) {
+                        active = true;
+                        var def = [];
+                        for (var i = 0; i < maps.length; i++) {
+                            if (options.target.id !== maps[i].id && options.target.loaded && options.target.extent !== maps[i].extent) {
+                                def.push(maps[i].setExtent(options.target.extent));
+                            }
+                        }
+                        var defs = new defList(def);
+                        defs.then(function () {
+                            active = false;
+                        });
+                    }
+                }
+
+                ready(function () {
+                    createMap("mapDiv1", "layerList1", null);
+                    createMap("mapDiv2", "layerList2", null);
+                    createMap("mapDiv3", "layerList3", null);
+                    createMap("mapDiv4", "layerList4", null);
+                });
+
+
+            });
+</script>
+</body>
+</html>
